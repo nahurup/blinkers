@@ -42,6 +42,8 @@ function PlayState:enter(params)
     self.initialSpawnDelay = 0.5 -- Wait 0.5 seconds before first spawn
     self.hasSpawnedFirstBall = false
     self.maxBalls = 8 -- Limit maximum balls to prevent overwhelming the player
+    self.lastSpawnTime = 0 -- Track last spawn time for cooldown
+    self.minSpawnCooldown = 0.3 -- Minimum 0.3 seconds between spawns
     
     -- Directional indicator system
     self.targetDirection = math.random(1, 2) -- 1 = LEFT, 2 = RIGHT
@@ -238,11 +240,20 @@ function PlayState:update(dt)
                 self.ballSpawnTimer = 0
                 self.ballSpawnInterval = math.random(0.8, 1.2) -- Normal spawning: 0.8-1.2 seconds
                 self.hasSpawnedFirstBall = true
+                self.lastSpawnTime = love.timer.getTime() -- Track last spawn time
             end
         else
-            self:spawnNewBall()
-            self.ballSpawnTimer = 0
-            self.ballSpawnInterval = math.random(0.8, 1.2) -- Normal spawning: 0.8-1.2 seconds
+            -- Additional safety check: ensure minimum time has passed since last spawn
+            local currentTime = love.timer.getTime()
+            if self.lastSpawnTime == 0 or (currentTime - self.lastSpawnTime) >= self.minSpawnCooldown then
+                self:spawnNewBall()
+                self.ballSpawnTimer = 0
+                self.ballSpawnInterval = math.random(0.8, 1.2) -- Normal spawning: 0.8-1.2 seconds
+                self.lastSpawnTime = currentTime -- Update last spawn time
+            else
+                -- Reset timer if we're still in cooldown to prevent rapid spawning
+                self.ballSpawnTimer = self.ballSpawnInterval * 0.5
+            end
         end
     end
     
