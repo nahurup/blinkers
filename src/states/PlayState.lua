@@ -583,27 +583,25 @@ function PlayState:renderActiveModifiers()
         for i, modifier in ipairs(self.activeModifiers) do
             local remainingTime = self.gameTimer - modifier.endTime
             
-            -- Don't display modifiers that have just expired
-            if remainingTime < 0 then goto continue end
-
-            local minutes = math.floor(remainingTime / 60)
-            local seconds = math.floor(remainingTime % 60)
-            local timeString = string.format("%02d:%02d", minutes, seconds)
-            
-            -- Change color based on remaining time
-            if remainingTime <= 30 then -- Last 30 seconds: red
-                love.graphics.setColor(1, 0, 0, 1)
-            elseif remainingTime <= 60 then -- Last minute: orange
-                love.graphics.setColor(1, 0.5, 0, 1)
-            else -- Normal: yellow
-                love.graphics.setColor(1, 1, 0, 1)
+            -- Only process modifiers that haven't expired
+            if remainingTime >= 0 then
+                local minutes = math.floor(remainingTime / 60)
+                local seconds = math.floor(remainingTime % 60)
+                local timeString = string.format("%02d:%02d", minutes, seconds)
+                
+                -- Change color based on remaining time
+                if remainingTime <= 30 then -- Last 30 seconds: red
+                    love.graphics.setColor(1, 0, 0, 1)
+                elseif remainingTime <= 60 then -- Last minute: orange
+                    love.graphics.setColor(1, 0.5, 0, 1)
+                else -- Normal: yellow
+                    love.graphics.setColor(1, 1, 0, 1)
+                end
+                
+                local text = modifier.name .. " - " .. timeString
+                love.graphics.printf(text, 0, yOffset, VIRTUAL_WIDTH, 'center')
+                yOffset = yOffset + 15
             end
-            
-            local text = modifier.name .. " - " .. timeString
-            love.graphics.printf(text, 0, yOffset, VIRTUAL_WIDTH, 'center')
-            yOffset = yOffset + 15
-
-            ::continue::
         end
     else
         -- Show message when no modifiers are active
