@@ -38,8 +38,10 @@ function PlayState:enter(params)
     -- Initialize multiple balls system - start with no balls
     self.balls = {} -- Start with no balls on paddle
     self.ballSpawnTimer = 0
-    self.ballSpawnInterval = math.random(0.6, 1.2) -- Slightly faster spawning: 0.6-1.2 seconds
-    -- No maximum ball limit - unlimited balls can be on screen
+    self.ballSpawnInterval = math.random(1.0, 1.5) -- Initial spawning: 1-1.5 seconds
+    self.initialSpawnDelay = 0.5 -- Wait 0.5 seconds before first spawn
+    self.hasSpawnedFirstBall = false
+    self.maxBalls = 8 -- Limit maximum balls to prevent overwhelming the player
     
     -- Directional indicator system
     self.targetDirection = math.random(1, 2) -- 1 = LEFT, 2 = RIGHT
@@ -227,11 +229,21 @@ function PlayState:update(dt)
     -- Update ball spawn timer
     self.ballSpawnTimer = self.ballSpawnTimer + dt
     
-    -- Spawn new ball if timer is up (no maximum limit)
-    if self.ballSpawnTimer >= self.ballSpawnInterval then
-        self:spawnNewBall()
-        self.ballSpawnTimer = 0
-        self.ballSpawnInterval = math.random(0.6, 1.2) -- Slightly faster spawning: 0.6-1.2 seconds
+    -- Spawn new ball if timer is up and under ball limit
+    if self.ballSpawnTimer >= self.ballSpawnInterval and #self.balls < self.maxBalls then
+        -- Add initial delay for first ball to prevent immediate spawning
+        if not self.hasSpawnedFirstBall then
+            if self.ballSpawnTimer >= self.initialSpawnDelay then
+                self:spawnNewBall()
+                self.ballSpawnTimer = 0
+                self.ballSpawnInterval = math.random(0.8, 1.2) -- Normal spawning: 0.8-1.2 seconds
+                self.hasSpawnedFirstBall = true
+            end
+        else
+            self:spawnNewBall()
+            self.ballSpawnTimer = 0
+            self.ballSpawnInterval = math.random(0.8, 1.2) -- Normal spawning: 0.8-1.2 seconds
+        end
     end
     
     -- Update all balls
