@@ -1,0 +1,4 @@
+Pause/Resume : Space
+Controls of a paddle : side arrows (left and right) - customizable in Options
+Pinball Paddle Tilt : A (tilt left) and D (tilt right) - customizable in Options
+Esc : to exit the game and return to previous menu
